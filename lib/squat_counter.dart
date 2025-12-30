@@ -7,6 +7,14 @@ class SquatCounter {
   int counter = 0;
   bool isDown = false;
 
+  /// Callback to be called when a repetition is completed.
+  final Function(int)? onRepetition;
+
+  /// Callback to be called when the user reaches the "down" position.
+  final Function()? onDown;
+
+  SquatCounter({this.onRepetition, this.onDown});
+
   // Thresholds for detecting the squat (Adjusted for better sensitivity)
   static const double angleThresholdDown =
       110.0; // Before 90, now it detects shallower squats
@@ -33,9 +41,11 @@ class SquatCounter {
     // State logic to count the repetition
     if (angle < angleThresholdDown && !isDown) {
       isDown = true;
+      onDown?.call();
     } else if (angle > angleThresholdUp && isDown) {
       isDown = false;
       counter++;
+      onRepetition?.call(counter);
     }
   }
 

@@ -5,6 +5,7 @@ import 'package:body_detection/squat_counter.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class CameraView extends StatefulWidget {
   const CameraView({super.key});
@@ -16,13 +17,33 @@ class CameraView extends StatefulWidget {
 class _CameraViewState extends State<CameraView> {
   CameraController? _cameraController;
   PoseDetector _poseDetector = PoseDetector(options: PoseDetectorOptions());
-  SquatCounter _squatCounter = SquatCounter();
+  late SquatCounter _squatCounter;
+  final FlutterTts _flutterTts = FlutterTts();
   bool _isProcessing = false;
 
   @override
   void initState() {
     super.initState();
+    _initializeTTS();
+    _initializeCounter();
     _initializeCamera();
+  }
+
+  void _initializeTTS() async {
+    await _flutterTts.setLanguage("en-US");
+    await _flutterTts.setSpeechRate(0.5);
+    await _flutterTts.setPitch(1.0);
+  }
+
+  void _initializeCounter() {
+    _squatCounter = SquatCounter(
+      onRepetition: (count) {
+        _flutterTts.speak("$count");
+      },
+      onDown: () {
+        _flutterTts.speak("Good, now up");
+      },
+    );
   }
 
   void _initializeCamera() async {
